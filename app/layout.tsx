@@ -39,7 +39,6 @@ export default function RootLayout({
               <Link href="/">المتجر</Link>
               <Link href="/cart">السلة</Link>
               <Link href="/checkout">الدفع</Link>
-              <Link href="/admin">الإدارة</Link>
             </nav>
           </div>
         </header>
