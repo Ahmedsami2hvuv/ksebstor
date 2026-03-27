@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { normalizeImageUrl } from "@/lib/image-url";
 
 type Category = {
@@ -44,105 +45,13 @@ export default function AdminPage() {
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 space-y-4 px-4 py-6">
       <section className="grid gap-3 md:grid-cols-3">
-        <div
-          className="rounded-2xl border bg-white p-4"
-          role="button"
-          tabIndex={0}
-          onClick={() => setIsCategoriesOpen((v) => !v)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") setIsCategoriesOpen((v) => !v);
-          }}
-        >
+        <Link href="/admin/categories" className="rounded-2xl border bg-white p-4 hover:bg-slate-50">
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm font-extrabold">الأقسام</p>
-            {isCategoriesOpen ? (
-              <button
-                className="bg-indigo-600 text-white"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsAddOpen((v) => !v);
-                }}
-              >
-                إنشاء قسم
-              </button>
-            ) : null}
+            <span className="text-xs text-slate-500">فتح صفحة كاملة</span>
           </div>
-
-          {!isCategoriesOpen ? (
-            <p className="mt-2 text-xs text-slate-500">اضغط لعرض الأقسام</p>
-          ) : null}
-
-          {isCategoriesOpen && isAddOpen ? (
-            <div className="mt-3 rounded-2xl border bg-slate-50 p-3" onClick={(e) => e.stopPropagation()}>
-              <form
-                className="space-y-2"
-                action={async (fd) => {
-                  setSaving(true);
-                  await fetch("/api/admin/categories", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      name: fd.get("name"),
-                      sortOrder: Number(fd.get("sortOrder") || 0),
-                      imageUrl: catImageUrl,
-                      notes: fd.get("notes"),
-                      parentId: null,
-                      isActive: true,
-                    }),
-                  });
-                  setCatImageUrl("");
-                  setIsAddOpen(false);
-                  await load();
-                  setSaving(false);
-                }}
-              >
-                <input name="name" placeholder="اسم القسم" required />
-                <input name="sortOrder" type="number" placeholder="تسلسل القسم" defaultValue={0} />
-                <div>
-                  <label className="mb-1 block text-xs text-slate-600">صورة القسم</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => uploadSingleImage(e.target.files, setCatImageUrl)}
-                  />
-                </div>
-                {catImageUrl ? (
-                  <img
-                    src={normalizeImageUrl(catImageUrl)}
-                    alt="category"
-                    className="h-20 w-24 rounded-xl border object-cover"
-                  />
-                ) : null}
-                <textarea name="notes" placeholder="ملاحظات القسم" />
-                <div className="flex gap-2">
-                  <button disabled={saving} className="bg-indigo-600 text-white disabled:opacity-60">
-                    {saving ? "جاري..." : "حفظ"}
-                  </button>
-                  <button
-                    type="button"
-                    className="bg-slate-200 text-slate-900"
-                    onClick={() => {
-                      setIsAddOpen(false);
-                      setCatImageUrl("");
-                    }}
-                  >
-                    إلغاء
-                  </button>
-                </div>
-              </form>
-            </div>
-          ) : null}
-
-          {isCategoriesOpen ? (
-            <div className="mt-3 space-y-2" onClick={(e) => e.stopPropagation()}>
-              {catTree.length === 0 ? (
-                <p className="text-xs text-slate-500">لا يوجد أقسام بعد.</p>
-              ) : (
-                catTree.map((node) => <CategoryRow key={node.id} node={node} level={0} onChanged={load} />)
-              )}
-            </div>
-          ) : null}
-        </div>
+          <p className="mt-2 text-xs text-slate-500">عرض الأقسام + بحث + إنشاء قسم</p>
+        </Link>
 
         <Box title="الأفرع" />
         <Box title="المنتجات" />
