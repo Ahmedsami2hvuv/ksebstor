@@ -1,10 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { StoreOrderStatus } from "@prisma/client";
 import { NextResponse } from "next/server";
-
-function createMainOrderId(storeOrderId: string) {
-  return `MAIN-${storeOrderId.slice(-8).toUpperCase()}-${Date.now().toString().slice(-6)}`;
-}
+import { transferOrderToMainSystem } from "@/lib/main-system";
 
 export async function POST(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -14,10 +11,11 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
     return NextResponse.json({ order });
   }
 
+  const transferred = await transferOrderToMainSystem(id);
   const updated = await prisma.storeOrder.update({
     where: { id },
-    data: { status: StoreOrderStatus.TRANSFERRED_TO_MAIN, mainOrderId: createMainOrderId(id) },
+    data: { status: StoreOrderStatus.TRANSFERRED_TO_MAIN, mainOrderId: transferred.mainOrderId },
   });
 
-  return NextResponse.json({ order: updated });
+  return NextResponse.json({ order: updated, integrationMode: transferred.mode });
 }

@@ -30,3 +30,10 @@ npm run dev
 - `POST /api/store/cart/variants`
 - `POST /api/store/checkout`
 - `POST /api/store/orders/:id/transfer`
+
+## ربط KSEBORDARSTOR
+
+- أضف المتغيرين في Railway:
+  - `KSEB_MAIN_ORDER_API_URL`
+  - `KSEB_MAIN_ORDER_API_TOKEN`
+- عند الضغط على "تحويل للنظام الأساسي" سيتم إرسال الطلب مباشرة إلى API النظام الرئيسي، ثم تخزين رقمه داخل `mainOrderId`.

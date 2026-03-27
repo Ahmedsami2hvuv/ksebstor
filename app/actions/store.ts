@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { StoreOrderStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { transferOrderToMainSystem } from "@/lib/main-system";
 
 export async function markOrderPreparing(orderId: string) {
   await prisma.storeOrder.update({
@@ -21,10 +22,10 @@ export async function markOrderReady(orderId: string) {
 }
 
 export async function transferStoreOrderToMain(orderId: string) {
-  const mainOrderId = `MAIN-${orderId.slice(-8).toUpperCase()}-${Date.now().toString().slice(-6)}`;
+  const transferred = await transferOrderToMainSystem(orderId);
   await prisma.storeOrder.update({
     where: { id: orderId },
-    data: { status: StoreOrderStatus.TRANSFERRED_TO_MAIN, mainOrderId },
+    data: { status: StoreOrderStatus.TRANSFERRED_TO_MAIN, mainOrderId: transferred.mainOrderId },
   });
   revalidatePath("/admin");
 }

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
 import AddToCartButton from "@/components/add-to-cart-button";
 import { notFound } from "next/navigation";
+import { normalizeImageUrl } from "@/lib/image-url";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +19,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     <main className="mx-auto flex w-full max-w-5xl flex-1 gap-6 px-4 py-6">
       <div className="grid w-1/2 gap-3">
         {product.images.map((img) => (
-          <div key={img.id} className="h-56 rounded-2xl border bg-cover bg-center" style={{ backgroundImage: `url(${img.url})` }} />
+          <div key={img.id} className="h-56 overflow-hidden rounded-2xl border bg-slate-100">
+            <img src={normalizeImageUrl(img.url)} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
+          </div>
         ))}
       </div>
       <section className="w-1/2 rounded-2xl border bg-white p-4">
