@@ -37,3 +37,11 @@ npm run dev
   - `KSEB_MAIN_ORDER_API_URL`
   - `KSEB_MAIN_ORDER_API_TOKEN`
 - عند الضغط على "تحويل للنظام الأساسي" سيتم إرسال الطلب مباشرة إلى API النظام الرئيسي، ثم تخزين رقمه داخل `mainOrderId`.
+
+## تخزين الصور بشكل دائم
+
+تم اعتماد Cloudinary لرفع صور المنتجات (بدل تخزين محلي مؤقت).
+
+- أضف في Railway:
+  - `CLOUDINARY_CLOUD_NAME`
+  - `CLOUDINARY_UPLOAD_PRESET` (Unsigned preset)
