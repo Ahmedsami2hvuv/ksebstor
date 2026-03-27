@@ -41,7 +41,17 @@ export default function AdminPage() {
   const catTree = buildTree(categories);
 
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
+    <main className="mx-auto w-full max-w-5xl flex-1 space-y-4 px-4 py-6">
+      <section className="grid gap-3 md:grid-cols-2">
+        <Box title="الأفرع" />
+        <Box title="المنتجات" />
+        <Box title="الطلبات الجديدة" />
+        <Box title="سجل الطلبات" />
+        <Box title="الأرباح" className="md:col-span-2" />
+        <Box title="حسابي" />
+        <Box title="المستخدمين" />
+      </section>
+
       <section className="rounded-2xl border bg-white p-4">
         <div className="flex items-center justify-between gap-3">
           <h1 className="text-2xl font-black">الأقسام حالياً</h1>
@@ -120,6 +130,15 @@ export default function AdminPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+function Box({ title, className = "" }: { title: string; className?: string }) {
+  return (
+    <div className={`rounded-2xl border bg-white p-4 ${className}`}>
+      <p className="text-sm font-extrabold">{title}</p>
+      <p className="mt-1 text-xs text-slate-500">قريباً</p>
+    </div>
   );
 }
 
