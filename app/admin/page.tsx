@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { formatCurrency } from "@/lib/utils";
 import { normalizeImageUrl } from "@/lib/image-url";
 
@@ -22,6 +22,13 @@ type Order = { id: string; customerName: string; status: string; totalAmount: st
 
 export default function AdminPage() {
   const [tab, setTab] = useState<Tab>("categories");
+  const allowedTabs = useMemo(() => new Set<Tab>(["categories", "branches", "products", "orders", "employees"]), []);
+
+  useEffect(() => {
+    const raw = new URL(window.location.href).searchParams.get("tab");
+    if (!raw) return;
+    if (allowedTabs.has(raw as Tab)) setTab(raw as Tab);
+  }, [allowedTabs]);
   const [categories, setCategories] = useState<Basic[]>([]);
   const [branches, setBranches] = useState<Basic[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
