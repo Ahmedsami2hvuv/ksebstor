@@ -42,92 +42,87 @@ export default function AdminPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 space-y-4 px-4 py-6">
-      <section className="grid gap-3 md:grid-cols-2">
-        <Box title="الأفرع" />
-        <Box title="المنتجات" />
-        <Box title="الطلبات الجديدة" />
-        <Box title="سجل الطلبات" />
-        <Box title="الأرباح" className="md:col-span-2" />
-        <Box title="حسابي" />
-        <Box title="المستخدمين" />
-      </section>
+      <section className="grid gap-3 md:grid-cols-3">
+        <div className="rounded-2xl border bg-white p-4">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-extrabold">الأقسام</p>
+            <button className="bg-indigo-600 text-white" onClick={() => setIsAddOpen((v) => !v)}>
+              إضافة قسم
+            </button>
+          </div>
 
-      <section className="rounded-2xl border bg-white p-4">
-        <div className="flex items-center justify-between gap-3">
-          <h1 className="text-2xl font-black">الأقسام حالياً</h1>
-          <button className="bg-indigo-600 text-white" onClick={() => setIsAddOpen((v) => !v)}>
-            إضافة قسم
-          </button>
-        </div>
-
-        {isAddOpen ? (
-          <div className="mt-4 rounded-2xl border bg-slate-50 p-4">
-            <h2 className="text-lg font-extrabold">إضافة قسم</h2>
-            <form
-              className="mt-3 space-y-3"
-              action={async (fd) => {
-                setSaving(true);
-                await fetch("/api/admin/categories", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    name: fd.get("name"),
-                    sortOrder: Number(fd.get("sortOrder") || 0),
-                    imageUrl: catImageUrl,
-                    notes: fd.get("notes"),
-                    parentId: null,
-                    isActive: true,
-                  }),
-                });
-                setCatImageUrl("");
-                setIsAddOpen(false);
-                await load();
-                setSaving(false);
-              }}
-            >
-              <input name="name" placeholder="اسم القسم" required />
-              <input name="sortOrder" type="number" placeholder="رقم القسم" defaultValue={0} />
-
-              <div>
-                <label className="mb-1 block text-xs text-slate-600">صورة القسم</label>
+          {isAddOpen ? (
+            <div className="mt-3 rounded-2xl border bg-slate-50 p-3">
+              <form
+                className="space-y-2"
+                action={async (fd) => {
+                  setSaving(true);
+                  await fetch("/api/admin/categories", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      name: fd.get("name"),
+                      sortOrder: Number(fd.get("sortOrder") || 0),
+                      imageUrl: catImageUrl,
+                      notes: fd.get("notes"),
+                      parentId: null,
+                      isActive: true,
+                    }),
+                  });
+                  setCatImageUrl("");
+                  setIsAddOpen(false);
+                  await load();
+                  setSaving(false);
+                }}
+              >
+                <input name="name" placeholder="اسم القسم" required />
+                <input name="sortOrder" type="number" placeholder="رقم القسم" defaultValue={0} />
                 <input type="file" accept="image/*" onChange={(e) => uploadSingleImage(e.target.files, setCatImageUrl)} />
                 {catImageUrl ? (
                   <img
                     src={normalizeImageUrl(catImageUrl)}
                     alt="category"
-                    className="mt-2 h-24 w-28 rounded-xl border object-cover"
+                    className="h-20 w-24 rounded-xl border object-cover"
                   />
                 ) : null}
-              </div>
+                <textarea name="notes" placeholder="ملاحظات القسم" />
+                <div className="flex gap-2">
+                  <button disabled={saving} className="bg-indigo-600 text-white disabled:opacity-60">
+                    {saving ? "جاري..." : "حفظ"}
+                  </button>
+                  <button
+                    type="button"
+                    className="bg-slate-200 text-slate-900"
+                    onClick={() => {
+                      setIsAddOpen(false);
+                      setCatImageUrl("");
+                    }}
+                  >
+                    إلغاء
+                  </button>
+                </div>
+              </form>
+            </div>
+          ) : null}
 
-              <textarea name="notes" placeholder="ملاحظات القسم" />
-
-              <div className="flex gap-2">
-                <button disabled={saving} className="bg-indigo-600 text-white disabled:opacity-60">
-                  {saving ? "جاري الحفظ..." : "حفظ"}
-                </button>
-                <button
-                  type="button"
-                  className="bg-slate-200 text-slate-900"
-                  onClick={() => {
-                    setIsAddOpen(false);
-                    setCatImageUrl("");
-                  }}
-                >
-                  إلغاء
-                </button>
-              </div>
-            </form>
+          <div className="mt-3 space-y-2">
+            {catTree.length === 0 ? (
+              <p className="text-xs text-slate-500">لا يوجد أقسام بعد.</p>
+            ) : (
+              catTree.map((node) => <CategoryRow key={node.id} node={node} level={0} onChanged={load} />)
+            )}
           </div>
-        ) : null}
-
-        <div className="mt-5 space-y-2">
-          {catTree.length === 0 ? (
-            <p className="text-sm text-slate-600">لا يوجد أقسام بعد.</p>
-          ) : (
-            catTree.map((node) => <CategoryRow key={node.id} node={node} level={0} onChanged={load} />)
-          )}
         </div>
+
+        <Box title="الأفرع" />
+        <Box title="المنتجات" />
+
+        <Box title="الطلبات الجديدة" />
+        <Box title="سجل الطلبات" />
+        <Box title="الأرباح" />
+
+        <Box title="حسابي" />
+        <Box title="المستخدمين" />
       </section>
     </main>
   );
