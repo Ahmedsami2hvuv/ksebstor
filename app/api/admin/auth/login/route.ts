@@ -30,8 +30,12 @@ export async function POST(req: Request) {
   const res = NextResponse.json({ ok: true, redirectTo });
   res.cookies.set("ksebstor_admin", "1", {
     httpOnly: true,
-    sameSite: "lax",
-    secure: true,
+    // Allow admin to work when embedded via iframe (third-party context).
+    // Browsers require SameSite=None to send cookies in third-party iframes.
+    sameSite: "none",
+    // SameSite=None requires Secure=true in modern browsers.
+    // Keep it on in production; in local dev (http) allow it to be false.
+    secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
   });
