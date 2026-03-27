@@ -24,6 +24,7 @@ export default function AdminCategoriesPage() {
   const [editId, setEditId] = useState<string>("");
   const [editImageUrl, setEditImageUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   async function load() {
     const c = await fetch("/api/admin/categories").then((x) => x.json());
@@ -150,20 +151,39 @@ export default function AdminCategoriesPage() {
             className="mt-3 space-y-3"
             action={async (fd) => {
               setSaving(true);
-              await fetch(`/api/admin/categories/${selected.id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  name: fd.get("name"),
-                  parentId: selected.parentId ?? null,
-                  notes: fd.get("notes"),
-                  sortOrder: Number(fd.get("sortOrder") || 0),
-                  imageUrl: editImageUrl || selected.imageUrl || "",
-                  isActive: selected.isActive ?? true,
-                }),
-              });
-              await load();
-              setSaving(false);
+              setError("");
+              try {
+                const name = String(fd.get("name") ?? "").trim();
+                const notes = String(fd.get("notes") ?? "");
+                const sortOrder = Number(fd.get("sortOrder") ?? 0);
+
+                const res = await fetch(`/api/admin/categories/${selected.id}`, {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    name,
+                    parentId: selected.parentId ?? null,
+                    notes,
+                    sortOrder,
+                    imageUrl: (editImageUrl || selected.imageUrl || "").trim(),
+                    isActive: selected.isActive ?? true,
+                  }),
+                });
+
+                if (!res.ok) {
+                  const data = await res.json().catch(() => ({}));
+                  setError(data?.error ?? "فشل تحديث القسم");
+                  return;
+                }
+
+                await load();
+                setEditId("");
+                setEditImageUrl("");
+              } catch {
+                setError("تعذر تحديث القسم");
+              } finally {
+                setSaving(false);
+              }
             }}
           >
             <input name="name" placeholder="اسم القسم" defaultValue={selected.name} required />
@@ -181,6 +201,7 @@ export default function AdminCategoriesPage() {
             <button disabled={saving} className="bg-amber-500 text-white disabled:opacity-60">
               {saving ? "جاري..." : "تحديث"}
             </button>
+            {error ? <p className="text-sm text-rose-700">{error}</p> : null}
           </form>
         </section>
       ) : null}
