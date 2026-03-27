@@ -17,6 +17,7 @@ type CategoryNode = Category & { children: CategoryNode[] };
 
 export default function AdminPage() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [catImageUrl, setCatImageUrl] = useState("");
   const [saving, setSaving] = useState(false);
@@ -43,16 +44,36 @@ export default function AdminPage() {
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 space-y-4 px-4 py-6">
       <section className="grid gap-3 md:grid-cols-3">
-        <div className="rounded-2xl border bg-white p-4">
+        <div
+          className="rounded-2xl border bg-white p-4"
+          role="button"
+          tabIndex={0}
+          onClick={() => setIsCategoriesOpen((v) => !v)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") setIsCategoriesOpen((v) => !v);
+          }}
+        >
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm font-extrabold">الأقسام</p>
-            <button className="bg-indigo-600 text-white" onClick={() => setIsAddOpen((v) => !v)}>
-              إضافة قسم
-            </button>
+            {isCategoriesOpen ? (
+              <button
+                className="bg-indigo-600 text-white"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsAddOpen((v) => !v);
+                }}
+              >
+                إنشاء قسم
+              </button>
+            ) : null}
           </div>
 
-          {isAddOpen ? (
-            <div className="mt-3 rounded-2xl border bg-slate-50 p-3">
+          {!isCategoriesOpen ? (
+            <p className="mt-2 text-xs text-slate-500">اضغط لعرض الأقسام</p>
+          ) : null}
+
+          {isCategoriesOpen && isAddOpen ? (
+            <div className="mt-3 rounded-2xl border bg-slate-50 p-3" onClick={(e) => e.stopPropagation()}>
               <form
                 className="space-y-2"
                 action={async (fd) => {
@@ -76,8 +97,15 @@ export default function AdminPage() {
                 }}
               >
                 <input name="name" placeholder="اسم القسم" required />
-                <input name="sortOrder" type="number" placeholder="رقم القسم" defaultValue={0} />
-                <input type="file" accept="image/*" onChange={(e) => uploadSingleImage(e.target.files, setCatImageUrl)} />
+                <input name="sortOrder" type="number" placeholder="تسلسل القسم" defaultValue={0} />
+                <div>
+                  <label className="mb-1 block text-xs text-slate-600">صورة القسم</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => uploadSingleImage(e.target.files, setCatImageUrl)}
+                  />
+                </div>
                 {catImageUrl ? (
                   <img
                     src={normalizeImageUrl(catImageUrl)}
@@ -105,13 +133,15 @@ export default function AdminPage() {
             </div>
           ) : null}
 
-          <div className="mt-3 space-y-2">
-            {catTree.length === 0 ? (
-              <p className="text-xs text-slate-500">لا يوجد أقسام بعد.</p>
-            ) : (
-              catTree.map((node) => <CategoryRow key={node.id} node={node} level={0} onChanged={load} />)
-            )}
-          </div>
+          {isCategoriesOpen ? (
+            <div className="mt-3 space-y-2" onClick={(e) => e.stopPropagation()}>
+              {catTree.length === 0 ? (
+                <p className="text-xs text-slate-500">لا يوجد أقسام بعد.</p>
+              ) : (
+                catTree.map((node) => <CategoryRow key={node.id} node={node} level={0} onChanged={load} />)
+              )}
+            </div>
+          ) : null}
         </div>
 
         <Box title="الأفرع" />
