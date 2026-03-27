@@ -5,7 +5,7 @@ import { formatCurrency } from "@/lib/utils";
 import { normalizeImageUrl } from "@/lib/image-url";
 
 type Tab = "categories" | "branches" | "products" | "orders" | "employees";
-type Basic = { id: string; name: string; parentId?: string | null; imageUrl?: string; notes?: string; sortOrder?: number };
+type Basic = { id: string; name: string; parentId?: string | null; imageUrl?: string; notes?: string; sortOrder?: number; isActive?: boolean };
 type Product = {
   id: string;
   name: string;
@@ -137,6 +137,27 @@ export default function AdminPage() {
             تعديل
           </button>
           <button
+            className={node.isActive ? "bg-slate-100 text-slate-800" : "bg-emerald-50 text-emerald-700"}
+            onClick={async () => {
+              const nextActive = !node.isActive;
+              await fetch(isCat ? `/api/admin/categories/${node.id}` : `/api/admin/branches/${node.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  name: node.name,
+                  parentId: node.parentId ?? null,
+                  notes: node.notes ?? "",
+                  sortOrder: node.sortOrder ?? 0,
+                  imageUrl: node.imageUrl ?? "",
+                  isActive: nextActive,
+                }),
+              });
+              await load();
+            }}
+          >
+            {node.isActive ? "إخفاء" : "إظهار"}
+          </button>
+          <button
             className="bg-rose-100 text-rose-700"
             onClick={async () => {
               if (!confirm("تأكيد الحذف؟")) return;
@@ -183,6 +204,7 @@ export default function AdminPage() {
               notes: fd.get("notes"),
               sortOrder: Number(fd.get("sortOrder") || 0),
               imageUrl: catImageUrl,
+              isActive: fd.get("isActive") === "on",
             }),
           });
           setCatImageUrl("");
@@ -195,6 +217,10 @@ export default function AdminPage() {
           <select name="parentId"><option value="">بدون أب</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
           <input type="file" accept="image/*" onChange={(e) => uploadSingleImage(e.target.files, setCatImageUrl)} />
           {catImageUrl ? <img src={normalizeImageUrl(catImageUrl)} alt="cat" className="h-20 w-24 rounded border object-cover" /> : null}
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="isActive" defaultChecked className="h-4 w-4" />
+            مفعل
+          </label>
           <button className="mt-2 bg-indigo-600 text-white">حفظ</button>
         </form>
         <form className="rounded-2xl border bg-white p-4" action={async (fd) => {
@@ -208,6 +234,7 @@ export default function AdminPage() {
               notes: fd.get("notes"),
               sortOrder: Number(fd.get("sortOrder") || 0),
               imageUrl: editCatImageUrl,
+              isActive: fd.get("isActive") === "on",
             }),
           });
           await load();
@@ -228,6 +255,10 @@ export default function AdminPage() {
               </select>
               <input type="file" accept="image/*" onChange={(e) => uploadSingleImage(e.target.files, setEditCatImageUrl)} />
               {editCatImageUrl ? <img src={normalizeImageUrl(editCatImageUrl)} alt="cat" className="h-20 w-24 rounded border object-cover" /> : null}
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="isActive" defaultChecked={selectedCategory.isActive ?? true} className="h-4 w-4" />
+                مفعل
+              </label>
               <button className="mt-2 bg-amber-500 text-white">تحديث</button>
             </>
           ) : null}
@@ -251,6 +282,7 @@ export default function AdminPage() {
               notes: fd.get("notes"),
               sortOrder: Number(fd.get("sortOrder") || 0),
               imageUrl: branchImageUrl,
+              isActive: fd.get("isActive") === "on",
             }),
           });
           setBranchImageUrl("");
@@ -263,6 +295,10 @@ export default function AdminPage() {
           <select name="parentId"><option value="">بدون أب</option>{branches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}</select>
           <input type="file" accept="image/*" onChange={(e) => uploadSingleImage(e.target.files, setBranchImageUrl)} />
           {branchImageUrl ? <img src={normalizeImageUrl(branchImageUrl)} alt="branch" className="h-20 w-24 rounded border object-cover" /> : null}
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="isActive" defaultChecked className="h-4 w-4" />
+            مفعل
+          </label>
           <button className="mt-2 bg-indigo-600 text-white">حفظ</button>
         </form>
         <form className="rounded-2xl border bg-white p-4" action={async (fd) => {
@@ -276,6 +312,7 @@ export default function AdminPage() {
               notes: fd.get("notes"),
               sortOrder: Number(fd.get("sortOrder") || 0),
               imageUrl: editBranchImageUrl,
+              isActive: fd.get("isActive") === "on",
             }),
           });
           await load();
@@ -296,6 +333,10 @@ export default function AdminPage() {
               </select>
               <input type="file" accept="image/*" onChange={(e) => uploadSingleImage(e.target.files, setEditBranchImageUrl)} />
               {editBranchImageUrl ? <img src={normalizeImageUrl(editBranchImageUrl)} alt="branch" className="h-20 w-24 rounded border object-cover" /> : null}
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="isActive" defaultChecked={selectedBranch.isActive ?? true} className="h-4 w-4" />
+                مفعل
+              </label>
               <button className="mt-2 bg-amber-500 text-white">تحديث</button>
             </>
           ) : null}

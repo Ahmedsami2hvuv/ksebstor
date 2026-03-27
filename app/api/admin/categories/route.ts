@@ -14,6 +14,7 @@ export async function POST(request: Request) {
       name: body.name,
       parentId: body.parentId || null,
       slug: toSlug(body.name),
+      isActive: body.isActive !== undefined ? Boolean(body.isActive) : true,
       imageUrl: body.imageUrl || "",
       notes: body.notes || "",
       sortOrder: Number(body.sortOrder ?? 0),

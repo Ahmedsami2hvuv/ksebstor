@@ -9,6 +9,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     data: {
       name: body.name,
       parentId: body.parentId || null,
+      isActive: body.isActive !== undefined ? Boolean(body.isActive) : true,
       imageUrl: body.imageUrl || "",
       notes: body.notes || "",
       sortOrder: Number(body.sortOrder ?? 0),

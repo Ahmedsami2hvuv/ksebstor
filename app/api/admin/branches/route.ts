@@ -14,6 +14,7 @@ export async function POST(request: Request) {
       name: body.name,
       parentId: body.parentId || null,
       code: body.code || toSlug(`${body.name}-${Date.now()}`).slice(0, 24),
+      isActive: body.isActive !== undefined ? Boolean(body.isActive) : true,
       imageUrl: body.imageUrl || "",
       notes: body.notes || "",
       sortOrder: Number(body.sortOrder ?? 0),
