@@ -25,10 +25,14 @@ model Category {
   id         String     @id @default(cuid())
   name       String
   slug       String     @unique
+  imageUrl   String     @default("")
+  notes      String     @default("")
+  sortOrder  Int        @default(0)
   parentId   String?
   parent     Category?  @relation("CategoryTree", fields: [parentId], references: [id])
   children   Category[] @relation("CategoryTree")
   products   Product[]
+  productLinks ProductCategory[]
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 }
@@ -37,10 +41,14 @@ model Branch {
   id         String    @id @default(cuid())
   name       String
   code       String    @unique
+  imageUrl   String    @default("")
+  notes      String    @default("")
+  sortOrder  Int       @default(0)
   parentId   String?
   parent     Branch?   @relation("BranchTree", fields: [parentId], references: [id])
   children   Branch[]  @relation("BranchTree")
   products   Product[]
+  productLinks ProductBranch[]
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 }
@@ -54,11 +62,33 @@ model Product {
   branchId    String
   category    Category        @relation(fields: [categoryId], references: [id])
   branch      Branch          @relation(fields: [branchId], references: [id])
+  categories  ProductCategory[]
+  branches    ProductBranch[]
   images      ProductImage[]
   variants    ProductVariant[]
   isActive    Boolean         @default(true)
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
+}
+
+model ProductCategory {
+  productId  String
+  categoryId String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@id([productId, categoryId])
+}
+
+model ProductBranch {
+  productId String
+  branchId  String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  branch    Branch  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([productId, branchId])
 }
 
 model ProductImage {
