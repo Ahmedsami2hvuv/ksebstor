@@ -19,6 +19,15 @@ export default function CartPage() {
   const [variants, setVariants] = useState<VariantPayload[]>([]);
 
   useEffect(() => {
+    reloadCart();
+  }, []);
+
+  function persist(next: CartLine[]) {
+    setItems(next);
+    localStorage.setItem("kseb_cart", JSON.stringify(next));
+  }
+
+  function reloadCart() {
     const cart = JSON.parse(localStorage.getItem("kseb_cart") ?? "[]") as CartLine[];
     setItems(cart);
     if (cart.length) {
@@ -29,8 +38,10 @@ export default function CartPage() {
       })
         .then((r) => r.json())
         .then((d) => setVariants(d.variants ?? []));
+    } else {
+      setVariants([]);
     }
-  }, []);
+  }
 
   const total = useMemo(() => {
     return items.reduce((sum, item) => {
@@ -49,7 +60,40 @@ export default function CartPage() {
             <div key={item.variantId} className="rounded-xl border bg-white p-3">
               <p className="font-semibold">{v?.product.name ?? item.title}</p>
               <p className="text-xs text-slate-500">{v?.color} - {v?.size} - {v?.shape}</p>
-              <p className="text-sm">الكمية: {item.quantity}</p>
+              <div className="mt-2 flex items-center gap-2">
+                <button
+                  className="border border-slate-300 bg-white"
+                  onClick={() => {
+                    const next = items.map((x) =>
+                      x.variantId === item.variantId ? { ...x, quantity: Math.max(1, x.quantity - 1) } : x,
+                    );
+                    persist(next);
+                  }}
+                >
+                  -
+                </button>
+                <p className="text-sm font-bold">الكمية: {item.quantity}</p>
+                <button
+                  className="border border-slate-300 bg-white"
+                  onClick={() => {
+                    const next = items.map((x) =>
+                      x.variantId === item.variantId ? { ...x, quantity: x.quantity + 1 } : x,
+                    );
+                    persist(next);
+                  }}
+                >
+                  +
+                </button>
+                <button
+                  className="bg-rose-50 text-rose-700"
+                  onClick={() => {
+                    const next = items.filter((x) => x.variantId !== item.variantId);
+                    persist(next);
+                  }}
+                >
+                  حذف
+                </button>
+              </div>
               <p className="font-bold text-indigo-700">{formatCurrency(Number(v?.sellingPrice ?? 0) * item.quantity)}</p>
             </div>
           );

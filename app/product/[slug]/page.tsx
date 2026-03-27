@@ -18,11 +18,17 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 gap-6 px-4 py-6">
       <div className="grid w-1/2 gap-3">
-        {product.images.map((img) => (
-          <div key={img.id} className="h-56 overflow-hidden rounded-2xl border bg-slate-100">
-            <img src={normalizeImageUrl(img.url)} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
+        {product.images.length ? (
+          product.images.map((img) => (
+            <div key={img.id} className="h-56 overflow-hidden rounded-2xl border bg-slate-100">
+              <img src={normalizeImageUrl(img.url)} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
+            </div>
+          ))
+        ) : (
+          <div className="flex h-56 items-center justify-center rounded-2xl border bg-slate-100 text-sm text-slate-500">
+            لا توجد صورة لهذا المنتج
           </div>
-        ))}
+        )}
       </div>
       <section className="w-1/2 rounded-2xl border bg-white p-4">
         <p className="text-xs text-slate-500">{product.category.name} / {product.branch.name}</p>

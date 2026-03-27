@@ -6,25 +6,29 @@ import { formatCurrency } from "@/lib/utils";
 type Basic = { id: string; name: string };
 type Product = { id: string; name: string };
 type Order = { id: string; customerName: string; status: string; totalAmount: string; mainOrderId: string | null };
+type Variant = { id: string; color: string; size: string; shape: string; stockQty: number; product: { name: string } };
 
 export default function AdminPage() {
   const [categories, setCategories] = useState<Basic[]>([]);
   const [branches, setBranches] = useState<Basic[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [variants, setVariants] = useState<Variant[]>([]);
   const [reports, setReports] = useState({ inventoryValue: 0, sales: 0, grossProfit: 0, ordersCount: 0, variantsCount: 0 });
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   async function load() {
-    const [c, b, p, r] = await Promise.all([
+    const [c, b, p, v, r] = await Promise.all([
       fetch("/api/admin/categories").then((x) => x.json()),
       fetch("/api/admin/branches").then((x) => x.json()),
       fetch("/api/admin/products").then((x) => x.json()),
+      fetch("/api/admin/variants").then((x) => x.json()),
       fetch("/api/admin/reports").then((x) => x.json()),
     ]);
     setCategories(c.data ?? []);
     setBranches(b.data ?? []);
     setProducts(p.data ?? []);
+    setVariants(v.data ?? []);
     const ordersData = await fetch("/api/admin/store-orders").then((x) => x.json()).catch(() => ({ data: [] }));
     setOrders(ordersData.data ?? []);
     setReports(r.data ?? reports);
@@ -126,6 +130,135 @@ export default function AdminPage() {
           <input name="stockQty" type="number" placeholder="الكمية" required />
           <button className="mt-2 bg-indigo-600 text-white">حفظ المتغير</button>
         </form>
+      </section>
+
+      <section className="rounded-2xl border bg-white p-4">
+        <h2 className="mb-3 font-extrabold">إدارة الأقسام والفروع (تعديل/حذف)</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <p className="mb-2 text-sm font-bold">الأقسام</p>
+            <div className="space-y-2">
+              {categories.map((c) => (
+                <div key={c.id} className="flex items-center gap-2 rounded-lg border p-2">
+                  <span className="flex-1 text-sm">{c.name}</span>
+                  <button
+                    className="bg-amber-100 text-amber-800"
+                    onClick={async () => {
+                      const name = prompt("اسم القسم الجديد", c.name);
+                      if (!name) return;
+                      await fetch(`/api/admin/categories/${c.id}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name }),
+                      });
+                      await load();
+                    }}
+                  >
+                    تعديل
+                  </button>
+                  <button
+                    className="bg-rose-100 text-rose-700"
+                    onClick={async () => {
+                      if (!confirm("حذف القسم؟")) return;
+                      await fetch(`/api/admin/categories/${c.id}`, { method: "DELETE" });
+                      await load();
+                    }}
+                  >
+                    حذف
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="mb-2 text-sm font-bold">الفروع</p>
+            <div className="space-y-2">
+              {branches.map((b) => (
+                <div key={b.id} className="flex items-center gap-2 rounded-lg border p-2">
+                  <span className="flex-1 text-sm">{b.name}</span>
+                  <button
+                    className="bg-amber-100 text-amber-800"
+                    onClick={async () => {
+                      const name = prompt("اسم الفرع الجديد", b.name);
+                      if (!name) return;
+                      await fetch(`/api/admin/branches/${b.id}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name }),
+                      });
+                      await load();
+                    }}
+                  >
+                    تعديل
+                  </button>
+                  <button
+                    className="bg-rose-100 text-rose-700"
+                    onClick={async () => {
+                      if (!confirm("حذف الفرع؟")) return;
+                      await fetch(`/api/admin/branches/${b.id}`, { method: "DELETE" });
+                      await load();
+                    }}
+                  >
+                    حذف
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border bg-white p-4">
+        <h2 className="mb-3 font-extrabold">إدارة المنتجات والمتغيرات (تعديل/حذف)</h2>
+        <div className="space-y-2">
+          {products.map((p) => (
+            <div key={p.id} className="flex items-center gap-2 rounded-lg border p-2">
+              <span className="flex-1 text-sm">{p.name}</span>
+              <button
+                className="bg-amber-100 text-amber-800"
+                onClick={async () => {
+                  const name = prompt("اسم المنتج الجديد", p.name);
+                  if (!name) return;
+                  await fetch(`/api/admin/products/${p.id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name }),
+                  });
+                  await load();
+                }}
+              >
+                تعديل
+              </button>
+              <button
+                className="bg-rose-100 text-rose-700"
+                onClick={async () => {
+                  if (!confirm("حذف المنتج؟")) return;
+                  await fetch(`/api/admin/products/${p.id}`, { method: "DELETE" });
+                  await load();
+                }}
+              >
+                حذف
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 space-y-2">
+          {variants.map((v) => (
+            <div key={v.id} className="flex items-center gap-2 rounded-lg border p-2">
+              <span className="flex-1 text-sm">{v.product.name} - {v.color}/{v.size}/{v.shape} (مخزون {v.stockQty})</span>
+              <button
+                className="bg-rose-100 text-rose-700"
+                onClick={async () => {
+                  if (!confirm("حذف المتغير؟")) return;
+                  await fetch(`/api/admin/variants/${v.id}`, { method: "DELETE" });
+                  await load();
+                }}
+              >
+                حذف
+              </button>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="rounded-2xl border bg-white p-4">
